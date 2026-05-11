@@ -268,3 +268,47 @@ RNN의 대표적 문제로 기울기 소실 문제(Vanishing Gradents)가 있음
 ### Vanishing gradeint proof sketch(linear case)
 
 ![1778479354107](image/Lecture5/1778479354107.png)
+
+![1778485581393](image/Lecture5/1778485581393.png)
+
+계산을 해보면, 임의의 j번째 손실값에 대해 i번째 hidden state에 대한 기울기를 구하면 이는 Wh의 I제곱과 상관있음을 확인이 가능(I=j-i) Wh의 제곱값을 구하기 위해 고유값 분해(Eigenvalue Decomposition)을 진행했을때, 만약 Wh의 고유값이 1보다 작다면, 이는 I가 커질 수록 0에 가까워짐. 즉, j와 i의 거리가 멀어질 수록 업데이트되는 기울기의 값이 줄어듦을 뜻함
+
+### Why is vanishing gradient a problem?
+
+기울기 소실이 문제인 이유
+
+![1778485799863](image/Lecture5/1778485799863.png)
+
+j와 i의 차가 클수록 기울기가 작아진다는 것은 j와 i의 차가 작을수록 적용되는 기울기 값이 더 커진다는 뜻임.
+
+ex)
+
+![1778485845761](image/Lecture5/1778485845761.png)
+
+빈칸의 단어는 tickets임. 하지만 RNN을 통해 해당 LM task을 진행하면 tickets를 출력하지 않음. 이는 tickets라는 단어가 빈칸과 거리가 너무 멀기 때문에 중요도가 떨어지기 때문. 반면 가까운 단어들은 가중치가 높게 받음.
+
+즉, 긴 거리의 맥락을 파악할 수 없음
+
+### Why is exploding gradient a problem?
+
+반대로, 매운 큰 기울기가 문제가 됨 SGD 의 식을 통해 알 수 있음.
+
+만약 gradient가 너무 크다면 학습률을 통해 기울기를 잡는다고 해도 loss값이 수렴하지 않을 수 있음. 또한 float64 등의 숫자 표현 기준을 넘어가는 기울기가 되면 inf가 되는 문제가 발생
+
+![1778485985530](image/Lecture5/1778485985530.png)
+
+### Gradient clipping : solution for explding gradient
+
+Gradient clipping을 통해 해결이 가능. 일정 값(threshold)를 넘어가는 기울기가 있다면 해당 기울기를 그 값으로 맞춰 너무 큰 기울기의 업데이트를 막는 방식. 일반적으로 20으로 설정
+
+![1778486050422](image/Lecture5/1778486050422.png)
+
+### How to fix the vanishing gradient problem?
+
+RNN 자체에서 이 문제 해결은 어려움. vanilla RNN에서는 hidden state들이 기본적으로 계속 재작성 되며 업데이트를 실행.
+
+즉, 덮어쓰기 당하는 것이기에, 이전의 정보들을 오래 기억할 수 없는 구조임. 따라서 다른 방안이 필요함
+
+## Long Short-Term Memory RNNs(LSTMs)
+
+LSTM은 RNN 기울기 소실 문제를 어느정도 해결하기 위해 나온 RNN의 변형임. 기존 RNN과 달리 hidden state h(t) 뿐 아니라 cell state c(t), gates vector를 추가로 갖음 이때 cell은 장기 정보를 저장하고, LSTM은 cell에 저장된 정보를 지우거나 읽거나 새롭게 추가함. 이는 gates vector를 통해 이루어지며, 열림(open,1)과 닫힘(close,0) 상태로 cell에 있는 정보를 지우거나 추가함.
